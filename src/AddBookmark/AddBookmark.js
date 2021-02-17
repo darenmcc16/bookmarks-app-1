@@ -1,15 +1,21 @@
 import React, { Component } from  'react';
+import BookmarksContext from '../BookmarksContext';
 import config from '../config'
 import './AddBookmark.css';
+import PropTypes from 'prop-types';
 
 const Required = () => (
   <span className='AddBookmark__required'>*</span>
 )
 
 class AddBookmark extends Component {
-  static defaultProps = {
-    onAddBookmark: () => {}
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func,
+    }).isRequired,
   };
+
+  static contextType = BookmarksContext;
 
   state = {
     error: null,
@@ -49,11 +55,16 @@ class AddBookmark extends Component {
         url.value = ''
         description.value = ''
         rating.value = ''
-        this.props.onAddBookmark(data)
+        this.context.addBookmarks(data)
+        this.props.history.push('/')
       })
       .catch(error => {
         this.setState({ error })
       })
+  }
+
+  handleClickCancel = () =>{
+    this.props.history.push('/')
   }
 
   render() {
@@ -123,7 +134,7 @@ class AddBookmark extends Component {
             />
           </div>
           <div className='AddBookmark__buttons'>
-            <button type='button' onClick={onClickCancel}>
+            <button type='button' onClick={this.handleClickCancel}>
               Cancel
             </button>
             {' '}

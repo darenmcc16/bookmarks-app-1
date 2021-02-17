@@ -4,6 +4,8 @@ import BookmarkList from './BookmarkList/BookmarkList';
 import Nav from './Nav/Nav';
 import config from './config';
 import './App.css';
+import BookmarksContext from './BookmarksContext';
+import {Route} from 'react-router-dom';
 
 const bookmarks = [
   // {
@@ -31,7 +33,6 @@ const bookmarks = [
 
 class App extends Component {
   state = {
-    page: 'list',
     bookmarks,
     error: null,
   };
@@ -54,6 +55,15 @@ class App extends Component {
     })
   }
 
+  deleteBookmark = bookmarkId => {
+    const newBookmarks = this.state.bookmarks.filter(bm =>
+      bm.id !==bookmarkId
+      )
+      this.setState({
+        bookmarks:newBookmarks
+      })
+  }
+
   componentDidMount() {
     fetch(config.API_ENDPOINT, {
       method: 'GET',
@@ -73,24 +83,27 @@ class App extends Component {
   }
 
   render() {
-    const { page, bookmarks } = this.state
+    const contextValue = {
+      bookmarks: this.state.bookmarks,
+      addBookmark: this.state.addBookmark,
+      deleteBookmark: this.state.deleteBookmark,
+    }
     return (
       <main className='App'>
         <h1>Bookmarks!</h1>
-        <Nav clickPage={this.changePage} />
+        <BookmarksContext.Provider value = {contextValue}>
+        <Nav />
         <div className='content' aria-live='polite'>
-          {page === 'add' && (
-            <AddBookmark
-              onAddBookmark={this.addBookmark}
-              onClickCancel={() => this.changePage('list')}
-            />
-          )}
-          {page === 'list' && (
-            <BookmarkList
-              bookmarks={bookmarks}
-            />
-          )}
+          <Route
+          path='/add-bookmark'
+          component={AddBookmark}
+          />
+          <Route
+          exact path='/'
+          component={BookmarkList}
+          />
         </div>
+        </BookmarksContext.Provider>
       </main>
     );
   }
